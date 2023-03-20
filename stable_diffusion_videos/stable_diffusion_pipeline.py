@@ -595,6 +595,8 @@ class StableDiffusionImageVariationVideoPipeline(DiffusionPipeline):
         smooth: Optional[float] = 0.0,
         negative_prompt: Optional[str] = None,
         make_video: Optional[bool] = True,
+        include_prompts: Optional[bool] = True,
+        n_propmt_frames: Optional[int] = 300,
     ):
         """Generate a video from a sequence of prompts and seeds. Optionally, add audio to the
         video to interpolate to the intensity of the audio.
@@ -814,6 +816,8 @@ class StableDiffusionImageVariationVideoPipeline(DiffusionPipeline):
                     sr=44100,
                 )
         if make_video:
+            if not include_prompts:
+                prompts = None #So prompts are not included
             return make_video_pyav(
                 save_path_root,
                 audio_filepath=audio_filepath,
@@ -823,6 +827,8 @@ class StableDiffusionImageVariationVideoPipeline(DiffusionPipeline):
                 output_filepath=output_filepath,
                 glob_pattern=f"**/*{image_file_ext}",
                 sr=44100,
+                prompts=prompts,
+                n_propmt_frames=n_propmt_frames
             )
 
     def init_noise(self, seed, noise_shape, dtype):

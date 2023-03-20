@@ -7,7 +7,7 @@ import torch
 from PIL import Image
 from torchvision.io import write_video
 from torchvision.transforms.functional import pil_to_tensor
-
+import torchvision.transforms as T
 
 def get_timesteps_arr(audio_filepath, offset, duration, fps=30, margin=1.0, smooth=0.0):
     y, sr = librosa.load(audio_filepath, offset=offset, duration=duration)
@@ -66,6 +66,27 @@ def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
     return v2
 
 
+def prepare_prompt_frame(
+        frame,
+        max_size
+):
+    """
+    Function to reshape input prompt as a padded square preserving aspect ratio
+    """
+    _,_, H, W =  frame.shape
+    image_max_size = H if H>W else W
+    # pad to square
+    if W > H:
+        padding = int((image_max_size - H)/2)
+        padded_frame = T.Pad((0,padding,0,padding))(frame)
+    else:
+        padding = int((image_max_size - W)/2)
+        padded_frame = T.Pad((padding,0))(frame)
+    
+    #Resize to max_size
+    resized_frame = T.Resize(size=max_size)(padded_frame)
+    return resized_frame
+
 def make_video_pyav(
     frames_or_frame_dir: Union[str, Path, torch.Tensor],
     audio_filepath: Union[str, Path] = None,
@@ -75,6 +96,8 @@ def make_video_pyav(
     sr: int = 22050,
     output_filepath: Union[str, Path] = "output.mp4",
     glob_pattern: str = "*.png",
+    prompts: str = None,
+    n_propmt_frames: int = 300
 ):
     """
     TODO - docstring here
@@ -88,9 +111,32 @@ def make_video_pyav(
 
     if isinstance(frames_or_frame_dir, (str, Path)):
         frames = None
-        for img in sorted(Path(frames_or_frame_dir).glob(glob_pattern)):
-            frame = pil_to_tensor(Image.open(img)).unsqueeze(0)
-            frames = frame if frames is None else torch.cat([frames, frame])
+        generated_paths = sorted(Path(frames_or_frame_dir).glob(glob_pattern))
+        
+        # Include prompt images into the video
+        if prompts is not None:
+            path_dict = {}
+            for path in generated_paths:
+                id = str(path).split('_')[1].split('/')[0]
+                if id in path_dict.keys():
+                    path_dict[id].append(path)
+                else:
+                    path_dict[id] = [path]
+            for k, v in path_dict.items():
+                frame = pil_to_tensor(Image.open(prompts[int(k)])).unsqueeze(0)
+                frame = prepare_prompt_frame(frame, max_size=512)
+                frames = frame.repeat(n_propmt_frames,1,1,1) if frames is None else torch.cat([frames, frame.repeat(n_propmt_frames,1,1,1)])
+                for img in v:
+                    frame = pil_to_tensor(Image.open(img)).unsqueeze(0)
+                    frames = frame if frames is None else torch.cat([frames, frame])
+            frame = pil_to_tensor(Image.open(prompts[-1])).unsqueeze(0)
+            frame = prepare_prompt_frame(frame, max_size=512)
+            frames = frame.repeat(n_propmt_frames,1,1,1) if frames is None else torch.cat([frames, frame.repeat(n_propmt_frames,1,1,1)])
+
+        else:
+            for img in generated_paths:
+                frame = pil_to_tensor(Image.open(img)).unsqueeze(0)
+                frames = frame if frames is None else torch.cat([frames, frame])
     else:
         frames = frames_or_frame_dir
 
