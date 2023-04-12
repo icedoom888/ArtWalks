@@ -38,6 +38,6 @@ videos = [ffmpeg.input(os.path.join(directory, "interpolated.mp4")) for director
 (
     ffmpeg
     .concat(*videos)
-    .output('out.mp4')
+    .output(os.path.join(args.input_path, 'final_video.mp4'))
     .run()
 )
