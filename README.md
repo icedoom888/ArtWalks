@@ -1,5 +1,6 @@
 # Diffusion-Videos
-> Note: I have not gone through all these steps, so I might have missed something or there might be typos. Please, update this README if something is not correct.
+
+[[_TOC_]]
 
 ## Architecture
 
@@ -10,6 +11,8 @@ Interpolate between all frames (original and generated) with FILM:
 ![](assets/frame_interpolation.jpg)
 
 ## Usage
+
+> Note: I have not gone through all these steps, so I might have missed something or there might be typos. Please, update this README if something is not correct.
 
 0. Clone repo:
 ```bash
