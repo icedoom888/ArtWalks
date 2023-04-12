@@ -17,11 +17,11 @@ parser.add_argument("--input_path", help="Path to folder with images",
 parser.add_argument("--output_path", help="Outputs path",
                     type=str, default="output")
 parser.add_argument("--glob_pattern", help="Pattern to find files",
-                    type=str, default="**/*.")
+                    type=str, default="**/*.") 
 parser.add_argument("--interpolation_steps", help="Number of generated frames between a pair of images",
                     type=int, default=5)
 parser.add_argument("--max_image_size", help="Max image size",
-                    type=int, default=256)
+                    type=int, default=256) # This needs to be fixed to 256 because the model outputs are fixed to 256x256
 parser.add_argument("-D", help="Debug",
                     action="store_true")
 args = parser.parse_args()
