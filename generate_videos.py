@@ -20,9 +20,9 @@ print(directories)
 # Number of frames N is: N=(2^times_to_interpolate+1)
 times_to_interpolate = int(math.log2(args.frames - 1))
 
-for directory in directories:
-    cmd_str = f'python3 -m frame-interpolation.eval.interpolator_cli --pattern "{directory}"    --model_path frame-interpolation/pretrained_models/film_net/Style/saved_model    --times_to_interpolate {times_to_interpolate}    --output_video'
-    subprocess.run(cmd_str, shell=True)
+# for directory in directories:
+#     cmd_str = f'python3 -m frame-interpolation.eval.interpolator_cli --pattern "{directory}"    --model_path frame-interpolation/pretrained_models/film_net/Style/saved_model    --times_to_interpolate {times_to_interpolate}    --output_video'
+#     subprocess.run(cmd_str, shell=True)
 
 # for directory in directories:
 #     files = natsort.natsorted(glob.glob(os.path.join(directory, "*")))
@@ -37,7 +37,7 @@ for directory in directories:
 videos = [ffmpeg.input(os.path.join(directory, "interpolated.mp4")) for directory in directories]
 (
     ffmpeg
-    .concat(videos)
+    .concat(*videos)
     .output('out.mp4')
     .run()
 )

@@ -1,7 +1,15 @@
 # Diffusion-Videos
 > Note: I have not gone through all these steps, so I might have missed something or there might be typos. Please, update this README if something is not correct.
 
-## Steps
+## Architecture
+
+Generate intermidiate frames with stable diffusion:
+![](assets/sd_interpolation.jpg)
+
+Interpolate between all frames (original and generated) with FILM:
+![](assets/frame_interpolation.jpg)
+
+## Usage
 
 0. Clone repo:
 ```bash
@@ -80,3 +88,11 @@ There are different lines to follow and finish the project:
 - We can experiemnt doing inter-frame interpolation with FILM before or after superresolution.
 - Fine-tuning stable diffusion model on the style of the artist: https://huggingface.co/docs/diffusers/training/dreambooth
 - Explore other methods like prompt-to-prompt: https://github.com/google/prompt-to-prompt/
+
+
+## Music
+
+```bash
+ffmpeg -i <INPUT-VIDEO> -stream_loop -1 -i assets/horror_music.mp3 -shortest -map 0:v:0 -map 1:a:0 -c:v copy output.mp4
+```
+> Note: Works iif the video is longer than the audio
