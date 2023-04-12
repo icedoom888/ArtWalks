@@ -69,7 +69,7 @@ def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
 def prepare_prompt_frame(
         frame,
         max_size
-):
+) -> torch:
     """
     Function to reshape input prompt as a padded square preserving aspect ratio
     """
@@ -84,7 +84,7 @@ def prepare_prompt_frame(
         padded_frame = T.Pad((padding,0))(frame)
     
     #Resize to max_size
-    resized_frame = T.Resize(size=max_size)(padded_frame)
+    resized_frame = T.Resize(size=(max_size,max_size))(padded_frame)
     return resized_frame
 
 def make_video_pyav(
