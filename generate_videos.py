@@ -34,7 +34,7 @@ for directory in directories:
 #         print(im.mode)
 #     print()
 
-videos = [ffmpeg.input(os.path.join(directory, "interpolated.mp4")) for directory in directories]
+videos = [ffmpeg.input(os.path.join(directory, "interpolated.mp4")) for directory in directories if os.path.exists(os.path.join(directory, "interpolated.mp4"))]
 (
     ffmpeg
     .concat(*videos)
