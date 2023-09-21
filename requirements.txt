@@ -4,6 +4,7 @@ scipy
 fire
 gradio
 librosa
-av<10.0.0
+av
 realesrgan==0.2.5.0
 natsort
+accelerate

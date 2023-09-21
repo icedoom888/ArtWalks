@@ -10,6 +10,17 @@ Generate intermidiate frames with stable diffusion:
 Interpolate between all frames (original and generated) with FILM:
 ![](assets/frame_interpolation.jpg)
 
+
+
+## Preparations
+
+Install ffmpeg and av dev libs
+
+```bash
+sudo apt install ffmpeg libavformat-dev libavdevice-dev
+```
+
+
 ## Usage
 
 > Note: I have not gone through all these steps, so I might have missed something or there might be typos. Please, update this README if something is not correct.
@@ -22,6 +33,7 @@ git submodule init
 git submodule update
 cd ..
 ```
+
 
 1. Create diffusers environemnt
 ```bash
