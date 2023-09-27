@@ -8,3 +8,5 @@ av
 realesrgan==0.2.5.0
 natsort
 accelerate
+torchvision
+opencv-python

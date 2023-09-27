@@ -20,12 +20,7 @@ Install ffmpeg and av dev libs
 sudo apt install ffmpeg libavformat-dev libavdevice-dev
 ```
 
-
-## Usage
-
-> Note: I have not gone through all these steps, so I might have missed something or there might be typos. Please, update this README if something is not correct.
-
-0. Clone repo:
+1. Clone repo:
 ```bash
 git clone git@gitlab.ethz.ch:mtc/special_project.git
 cd frame-interpolation
@@ -34,63 +29,78 @@ git submodule update
 cd ..
 ```
 
-
-1. Create diffusers environemnt
+2. Create diffusers environemnt
 ```bash
 conda create -n diffusers python=3.10 -y
-pip install -r requirements.txt
 conda activate diffusers
-```
-
-2. Run unCLIP pipeline to interpolate between every pair of images in `input_path`:
-
-> It takes roughly ~10s per pair
-
-```bash
-python unclip.py --input_path ../mtc-gtc/
-```
-
-This script makes use of the [UnCLIP Image Interpolation pipeline](https://github.com/huggingface/diffusers/tree/main/examples/community#unclip-image-interpolation-pipeline). It takes every image in the input_path, [natsort](https://github.com/SethMMorton/natsort/wiki/How-Does-Natsort-Work%3F) it and create n interpolations between every pair of images. Script arguments:
-```python
-parser.add_argument("--input_path", help="Path to folder with images",
-                    type=str)
-parser.add_argument("--output_path", help="Outputs path",
-                    type=str, default="output")
-parser.add_argument("--glob_pattern", help="Pattern to find files",
-                    type=str, default="**/*.") 
-parser.add_argument("--interpolation_steps", help="Number of generated frames between a pair of images",
-                    type=int, default=5)
-parser.add_argument("--max_image_size", help="Max image size",
-                    type=int, default=256) # This needs to be fixed to 256 because the model outputs are fixed to 256x256
-parser.add_argument("-D", help="Debug",
-                    action="store_true")
+pip install -r requirements.txt
+conda deactivate
 ```
 
 3. Create FILM environemnt
 ```bash
 conda create -n film python=3.9 -y
+conda activate film
 cd frame-interpolation
 pip install -r requirements.txt
 pip install tensorflow
-conda activate film
+conda deactivate
 ```
 
-3.1. Download the pretrained models: https://github.com/google-research/frame-interpolation#pre-trained-models
+## Full Pipeline
 
-4. Generate videos with:
-
-> It takes roughly ~2 mins per pair
-
+You can run the full pipeline using the following command:
 ```bash
-python generate_videos.py --input_path output/20230412-151520
+bash full_pipeline.sh $INPATH $FOLDER_NAME $S $I $F
 ```
-Script arguments:
-```python
-parser.add_argument("--input_path", help="Path to folder with images",
-                    type=str)
-parser.add_argument("--frames", help="Number of frames to interpolate between images",
-                    type=int, default=360) # This is an approximation, because the number of frames N is: N=(2^times_to_interpolate+1). times_to_interpolate is the argument to the script, which must be an int (so there will be a bit more/less number of frames probably.)
-```
+Where:
+ - *INPATH* : Path to the input data folder
+ - *FOLDER_NAME* : Name of the folder containing the images
+ - *S* : Number of images to generate with diffusion between each pair of images
+ - *I* : Number of interpolation images to generate between each pair of generated images
+ - *F* : Number of seconds to freeze on each original image during the video 
+
+## Usage
+
+1. Run unCLIP pipeline to interpolate between every pair of images in `input_path` (It takes roughly ~10s per pair):
+
+    ```bash
+    python unclip.py --input_path ../mtc-gtc/ --folder_name Story_A
+    ```
+
+    This script makes use of the [UnCLIP Image Interpolation pipeline](https://github.com/huggingface/diffusers/tree/main/examples/community#unclip-image-interpolation-pipeline). It takes every image in the input_path, [natsort](https://github.com/SethMMorton/natsort/wiki/How-Does-Natsort-Work%3F) it and create n interpolations between every pair of images. Script arguments:
+    ```python
+    parser.add_argument("--input_path", help="Path to folder with images",
+                            type=str)
+    parser.add_argument("--folder_name", help="Name of the folder to read",
+                        type=str)
+    parser.add_argument("--output_path", help="Outputs path",
+                        type=str, default="output")
+    parser.add_argument("--glob_pattern", help="Pattern to find files",
+                        type=str, default="**/*.") 
+    parser.add_argument("--interpolation_steps", help="Number of generated frames between a pair of images",
+                        type=int, default=5)
+    parser.add_argument("--max_image_size", help="Max image size",
+                        type=int, default=256) # This needs to be fixed to 256 because the model outputs are fixed to 256x256
+    parser.add_argument("-D", help="Debug",
+                        action="store_true")
+    ```
+
+2. Generate videos with (It takes roughly ~2 mins per pair):
+    ```bash
+    python generate_videos.py --input_path output --folder_name Story_A
+    ```
+    Script arguments:
+    ```python
+    parser.add_argument("--input_path", help="Path to folder with images",
+                            type=str)
+
+    parser.add_argument("--folder_name", help="Name of the folder to read",
+                        type=str)
+
+    parser.add_argument("--frames", help="Number of frames to interpolate between images",
+                        type=int, default=360) # This is an approximation, because the number of frames N is: N=(2^times_to_interpolate+1). times_to_interpolate is the argument to the script, which must be an int (so there will be a bit more/less number of frames probably.)
+    ```
 
 ## `variations.py`
 
