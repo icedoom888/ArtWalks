@@ -1,7 +1,6 @@
 [submodule "frame-interpolation"]
 	path = frame-interpolation
 	url = https://github.com/google-research/frame-interpolation.git
-
 [submodule "Video-Super-Resolution-ESRGAN"]
 	path = Video-Super-Resolution-ESRGAN
 	url = https://github.com/saba99/Video-Super-Resolution-ESRGAN.git
