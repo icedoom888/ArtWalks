@@ -9,6 +9,8 @@ import time
 from stable_diffusion_videos.utils import prepare_prompt_frame
 from torchvision.transforms.functional import pil_to_tensor
 import torchvision.transforms as T
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def save_originals(images, save_path, idx):
@@ -35,6 +37,7 @@ def image_generation(args):
         torch_dtype=dtype,
         custom_pipeline="unclip_image_interpolation"
     )
+    print(pipe)
     pipe.to(device)
 
     # Get all files
@@ -45,16 +48,16 @@ def image_generation(args):
     artworks = natsort.natsorted([image for images in artworks for image in images])
 
     print()
-    print(f"Found {len(artworks)} files:")
+    print(f"Found {len(artworks)} images:")
     for aw in artworks:
         print(aw)
     print()
 
     # Make outfolder
-    generator = torch.Generator(device=device).manual_seed(42)
+    generator = torch.Generator(device=device)#.manual_seed(42)
     output_name = args.folder_name
     save_path = os.path.join(args.output_path, output_name)
-    os.makedirs(save_path)
+    os.makedirs(save_path, exist_ok=True)
 
     # generate images for each couple
     for idx, (img1, img2) in enumerate(zip(artworks, artworks[1:])):
@@ -66,10 +69,13 @@ def image_generation(args):
                                 generator=generator)
 
         interpolation_save_path = os.path.join(save_path, f"{idx}-{idx+1}")
-        os.makedirs(interpolation_save_path)
+        os.makedirs(interpolation_save_path, exist_ok=True)
         save_originals(images, interpolation_save_path, idx)
 
         for i,image in enumerate(generated_frames.images):
+            # if True:
+            #     image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}-0.png"))
+            #     image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}-1.png"))
             image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}.png"))
 
 
