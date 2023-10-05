@@ -13,15 +13,36 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def save_originals(images, save_path, idx):
+def save_originals(images, save_path, idx, square_crop=False):
     img1, img2 = images
+    
+    # crop images from the center
+    if square_crop: 
+        width, height = img1.size   
+
+        left = (width - min(width, height))/2
+        top = (height - min(width, height))/2
+        right = (width + min(width, height))/2
+        bottom = (height + min(width, height))/2
+
+        img1 = img1.crop((left, top, right, bottom))
+
+        width, height = img2.size   # Get dimensions
+
+        left = (width - min(width, height))/2
+        top = (height - min(width, height))/2
+        right = (width + min(width, height))/2
+        bottom = (height + min(width, height))/2
+
+        img2 = img2.crop((left, top, right, bottom))
+
     resized_img1 = prepare_prompt_frame(pil_to_tensor(img1).unsqueeze(0), args.max_image_size).squeeze(0)
     pil_img = T.ToPILImage()(resized_img1)
-    pil_img.save(os.path.join(save_path, f"{idx}-{idx}.png"))
+    pil_img.save(os.path.join(save_path, "%02d-%02d.png"%(idx, idx)))
 
     resized_img2 = prepare_prompt_frame(pil_to_tensor(img2).unsqueeze(0),args.max_image_size).squeeze(0)
     pil_img = T.ToPILImage()(resized_img2)
-    pil_img.save(os.path.join(save_path, f"{idx+1}-{idx+1}.png"))
+    pil_img.save(os.path.join(save_path, "%02d-%02d.png"%(idx+1, idx+1)))
 
 
 def image_generation(args):
@@ -37,17 +58,17 @@ def image_generation(args):
         torch_dtype=dtype,
         custom_pipeline="unclip_image_interpolation"
     )
-    print(pipe)
+    # print(pipe)
     pipe.to(device)
 
     # Get all files
     extensions = ["png", "jpg", "jpeg"]
     path = os.path.join(args.input_path, args.folder_name)
-    print(f"Looking in {path=} for files with {extensions=}")
+    # print(f"Looking in {path=} for files with {extensions=}")
     artworks = [glob.glob(os.path.join(path, f"{args.glob_pattern}{extension}"), recursive=True) for extension in extensions]
     artworks = natsort.natsorted([image for images in artworks for image in images])
 
-    print()
+    # print()
     print(f"Found {len(artworks)} images:")
     for aw in artworks:
         print(aw)
@@ -68,15 +89,16 @@ def image_generation(args):
                                 steps=args.interpolation_steps, 
                                 generator=generator)
 
-        interpolation_save_path = os.path.join(save_path, f"{idx}-{idx+1}")
+        interpolation_save_path = os.path.join(save_path, "%02d-%02d"%(idx, idx+1))
         os.makedirs(interpolation_save_path, exist_ok=True)
-        save_originals(images, interpolation_save_path, idx)
+        if not args.no_originals:
+            save_originals(images, interpolation_save_path, idx, square_crop=args.square_crop)
 
         for i,image in enumerate(generated_frames.images):
             # if True:
             #     image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}-0.png"))
             #     image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}-1.png"))
-            image.save(os.path.join(interpolation_save_path, f"{idx}-{idx+1}-{i}.png"))
+            image.save(os.path.join(interpolation_save_path, "%02d-%02d-%02d.png"%(idx, idx+1, i)))
 
 
 if __name__ == "__main__":
@@ -96,6 +118,9 @@ if __name__ == "__main__":
                         type=int, default=256) # This needs to be fixed to 256 because the model outputs are fixed to 256x256
     parser.add_argument("-D", help="Debug",
                         action="store_true")
+    parser.add_argument("--square_crop", help="If active, crops the images in a square.", action="store_true")
+    parser.add_argument("--no_originals", help="If active, don't save original images.", action="store_true")
+
     args = parser.parse_args()
 
     image_generation(args)

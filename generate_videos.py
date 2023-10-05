@@ -108,16 +108,11 @@ def interpolate_images(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_path", help="Path to folder with images", default='output',
-                        type=str)
-    parser.add_argument("--folder_name", help="Name of the folder to read",
-                        type=str)
+    parser.add_argument("--input_path", help="Path to folder with images", type=str)
+    parser.add_argument("--folder_name", help="Name of the folder to read", type=str)
     parser.add_argument("--sec_interpolation", help="Number of seconds to interpolate between images", type=int, default=10)
     parser.add_argument("--sec_freeze", help="Number of seconds to freeze per original image", type=int, default=20)
     parser.add_argument("--clean", help="Delete everything but the final video", action='store_true')
-
-    args = parser.parse_args()
-
 
     args = parser.parse_args()
 

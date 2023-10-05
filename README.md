@@ -59,6 +59,28 @@ pip install -r requirements.txt
 conda deactivate
 ```
 
+5. (Optional) Create Music environment
+```bash
+conda create -n music python=3.8
+conda activate srmusic
+pip install torch torchvideo torchaudio
+pip install -U git+https://github.com/facebookresearch/demucs#egg=demucs
+pip install tqdm
+pip install matplotlib opencv-python librosa Ipython
+conda deactivate
+```
+
+6. Complete environment (no tf)
+```bash
+conda create -p /projects/Anaconda/envs/diff python=3.8 -y
+conda activate diff
+conda install cudnn -y
+pip install -r requirements_total.txt --no-cache-dir
+pip install -U git+https://github.com/facebookresearch/demucs#egg=demucs
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/Anaconda/envs/diff/lib/python3.8/site-packages/tensorrt_libs
+conda deactivate
+```
+
 ## Full Pipeline
 
 You can run the full pipeline using the following command:
@@ -72,6 +94,17 @@ Where:
  - *I* : Number of interpolation images to generate between each pair of generated images
  - *F* : Number of seconds to freeze on each original image during the video 
 
+
+## Story Generator
+
+Generate a random story by using a collection of immages:
+
+```bash
+python random_story_generation.py --input_path inputdata --img_num 10
+```
+Where:
+ - *input_path* : Path to the folder containing all subfolders of images
+ - *img_num* : Number of images to randomly sample
 ## Usage
 
 1. Run unCLIP pipeline to interpolate between every pair of images in `input_path` (It takes roughly ~10s per pair):
@@ -165,17 +198,12 @@ Where:
         help='Image extension. Options: auto | jpg | png, auto means using the same extension as inputs')
     ```
 
+
+
+
 ## `variations.py`
 
 This is another pipeline I've been experimenting with is based on the ImageVariationPipeline([more info here](https://huggingface.co/lambdalabs/sd-image-variations-diffusers)) and the [Stable Diffusion Interpolation](https://github.com/huggingface/diffusers/tree/main/examples/community#stable-diffusion-interpolation) (only text based, which was adapted to accept two images as input and interpolate between them). It has everything already integrated to go from frames to videos, but without inter-frame interpolation using FILM. Results are pretty cool but I found that they are a bit worse than the unclip pipeline.
-
-## Future steps
-
-There are different lines to follow and finish the project:
-- We can experiemnt doing inter-frame interpolation with FILM before or after superresolution.
-- Fine-tuning stable diffusion model on the style of the artist: https://huggingface.co/docs/diffusers/training/dreambooth
-- Explore other methods like prompt-to-prompt: https://github.com/google/prompt-to-prompt/
-
 
 ## Music
 

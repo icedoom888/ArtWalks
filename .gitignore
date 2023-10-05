@@ -139,6 +139,10 @@ examples/music
 *.png
 output/
 inputdata/
+stories/
+music/
+random_*/
+social/
 
 # frame-interpolation
 frame-interpolation/eval/__pycache__/

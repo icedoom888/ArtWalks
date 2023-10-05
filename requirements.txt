@@ -1,5 +1,5 @@
-transformers>=4.21.0
-diffusers==0.11.1
+transformers
+diffusers
 scipy
 fire
 gradio
@@ -10,3 +10,5 @@ natsort
 accelerate
 torchvision
 opencv-python
+torchaudio 
+torch
