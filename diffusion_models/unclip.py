@@ -5,13 +5,31 @@ import argparse
 import glob
 import os
 import natsort
-import time
-from stable_diffusion_videos.utils import prepare_prompt_frame
 from torchvision.transforms.functional import pil_to_tensor
 import torchvision.transforms as T
 import warnings
 warnings.filterwarnings("ignore")
 
+def prepare_prompt_frame(
+        frame,
+        max_size
+) -> torch:
+    """
+    Function to reshape input prompt as a padded square preserving aspect ratio
+    """
+    _,_, H, W =  frame.shape
+    image_max_size = H if H>W else W
+    # pad to square
+    if W > H:
+        padding = int((image_max_size - H)/2)
+        padded_frame = T.Pad((0,padding,0,padding))(frame)
+    else:
+        padding = int((image_max_size - W)/2)
+        padded_frame = T.Pad((padding,0))(frame)
+    
+    #Resize to max_size
+    resized_frame = T.Resize(size=(max_size,max_size))(padded_frame)
+    return resized_frame
 
 def save_originals(images, save_path, idx, square_crop=False):
     img1, img2 = images
@@ -36,14 +54,13 @@ def save_originals(images, save_path, idx, square_crop=False):
 
         img2 = img2.crop((left, top, right, bottom))
 
-    resized_img1 = prepare_prompt_frame(pil_to_tensor(img1).unsqueeze(0), args.max_image_size).squeeze(0)
+    resized_img1 = prepare_prompt_frame(pil_to_tensor(img1).unsqueeze(0), 256).squeeze(0)
     pil_img = T.ToPILImage()(resized_img1)
     pil_img.save(os.path.join(save_path, "%02d-%02d.png"%(idx, idx)))
 
-    resized_img2 = prepare_prompt_frame(pil_to_tensor(img2).unsqueeze(0),args.max_image_size).squeeze(0)
+    resized_img2 = prepare_prompt_frame(pil_to_tensor(img2).unsqueeze(0), 256).squeeze(0)
     pil_img = T.ToPILImage()(resized_img2)
     pil_img.save(os.path.join(save_path, "%02d-%02d.png"%(idx+1, idx+1)))
-
 
 def image_generation(args):
 
@@ -114,10 +131,6 @@ if __name__ == "__main__":
                         type=str, default="**/*.") 
     parser.add_argument("--interpolation_steps", help="Number of generated frames between a pair of images",
                         type=int, default=5)
-    parser.add_argument("--max_image_size", help="Max image size",
-                        type=int, default=256) # This needs to be fixed to 256 because the model outputs are fixed to 256x256
-    parser.add_argument("-D", help="Debug",
-                        action="store_true")
     parser.add_argument("--square_crop", help="If active, crops the images in a square.", action="store_true")
     parser.add_argument("--no_originals", help="If active, don't save original images.", action="store_true")
 

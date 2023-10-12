@@ -21,11 +21,14 @@ echo "SECONDS BETWEEN IMAGES: $I"
 F=$5
 echo "SECONDS OF FREEZING ORIGINAL FRAMES: $F"
 
+M=$6
+echo "MODEL CHOSEN: $M"
+
 echo ""
 
 # Generate dissusion images
 conda activate diff
-python unclip.py --input_path $INPATH --folder_name $FOLDER_NAME --interpolation_steps $S
+python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --model $M --interpolation_steps $S 
 conda deactivate
 
 # interpolate between images and generate video
@@ -36,5 +39,10 @@ conda deactivate
 # Super resolution on Video
 conda activate diff
 cd Video-Super-Resolution-ESRGAN
-python inference_realesrgan_video.py -n RealESRGAN_x4plus -i ../output/$FOLDER_NAME/final_video.mp4 -o ../output/$FOLDER_NAME/ -s 8
+if [ "$M" = 'kandisnky' ]; then
+    sr=2
+else
+    sr=8
+fi
+python inference_realesrgan_video.py -n RealESRGAN_x4plus -i ../output/$FOLDER_NAME/final_video.mp4 -o ../output/$FOLDER_NAME/ -s $sr
 conda deactivate

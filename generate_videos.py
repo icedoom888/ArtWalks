@@ -114,6 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--sec_freeze", help="Number of seconds to freeze per original image", type=int, default=20)
     parser.add_argument("--clean", help="Delete everything but the final video", action='store_true')
 
+
     args = parser.parse_args()
 
     interpolate_images(args)

@@ -10,7 +10,7 @@ def list_jpg_files_in_subfolders(root_folder):
     # Walk through the root folder and its subfolders
     for root, _, files in os.walk(root_folder):
         for file in files:
-            if file.lower().endswith(".jpg"):
+            if file.lower().endswith((".jpg", ".png", ".JPG", ".jpeg", ".PNG")):
                 jpg_files.append(os.path.join(root, file))
     
     return jpg_files
