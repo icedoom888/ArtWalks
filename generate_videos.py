@@ -57,7 +57,7 @@ def make_video_from_image(video_path, sec_freeze, fps=30, first=False):
 
     return out_path
 
-def interpolate_images(args):
+def image_interpolation(args):
 
     folder_path = os.path.join(args.input_path, args.folder_name)
 
@@ -70,7 +70,7 @@ def interpolate_images(args):
     times_to_interpolate = int(math.log2(frames - 1))
 
     # Run interpolation for all directories
-    for directory in directories:
+    for directory in directories:            
         cmd_str = f'python3 -m frame-interpolation.eval.interpolator_cli --pattern "{directory}"    --model_path frame-interpolation/pretrained_models/film_net/Style/saved_model    --times_to_interpolate {times_to_interpolate}    --output_video'
         subprocess.run(cmd_str, shell=True)
 
@@ -117,4 +117,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    interpolate_images(args)
+    image_interpolation(args)

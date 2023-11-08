@@ -16,7 +16,8 @@ def generate_diffusion_images(args):
             ]
     
     else:
-        h, w = 1024, 1024
+        # h, w = 1024, 1024
+        h, w = 720, 1280
         cmd = ["python", "diffusion_models/kandinsky.py",
             "--input_path", args.input_path,
             "--folder_name", args.folder_name,

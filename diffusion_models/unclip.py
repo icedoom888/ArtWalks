@@ -79,7 +79,7 @@ def image_generation(args):
     pipe.to(device)
 
     # Get all files
-    extensions = ["png", "jpg", "jpeg"]
+    extensions = ["png", "jpg", "jpeg", "JPG"]
     path = os.path.join(args.input_path, args.folder_name)
     # print(f"Looking in {path=} for files with {extensions=}")
     artworks = [glob.glob(os.path.join(path, f"{args.glob_pattern}{extension}"), recursive=True) for extension in extensions]
