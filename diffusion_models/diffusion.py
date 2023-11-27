@@ -18,6 +18,7 @@ def generate_diffusion_images(args):
     else:
         # h, w = 1024, 1024
         h, w = 720, 1280
+        # h, w = 768, 768
         cmd = ["python", "diffusion_models/kandinsky.py",
             "--input_path", args.input_path,
             "--folder_name", args.folder_name,
@@ -31,6 +32,8 @@ def generate_diffusion_images(args):
         cmd.append("--square_crop")
     if args.no_originals:
         cmd.append("--no_originals")
+    if args.outpaint:
+        cmd.append("--outpaint")
 
     subprocess.call(cmd, shell=False)
 
@@ -50,6 +53,7 @@ if __name__ == "__main__":
                         type=int, default=5)
     parser.add_argument("--square_crop", help="If active, crops the images in a square.", action="store_true")
     parser.add_argument("--no_originals", help="If active, don't save original images.", action="store_true")
+    parser.add_argument("--outpaint", help="If active, outpaints the image using generative model.", action="store_true")
 
     args = parser.parse_args()
 

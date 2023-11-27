@@ -143,6 +143,8 @@ stories/
 music/
 random_*/
 social/
+short_content/
+scripts/
 
 # frame-interpolation
 frame-interpolation/eval/__pycache__/

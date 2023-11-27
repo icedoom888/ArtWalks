@@ -79,14 +79,17 @@ def image_interpolation(args):
 
     # Load all available directories
     directories = natsort.natsorted(glob.glob(os.path.join(folder_path, "*")))
-    print(f"Found the following directories to interpolate: \n{directories}")
-
+    print(f"Found the following directories to interpolate: \n{directories}\n")
     # need this to balance log2 
     carry_frames = 0
 
     # Run interpolation for all directories
     for directory in directories:
         artworks = [os.path.join(directory, f) for f in sorted(os.listdir(directory)) if os.path.isfile(os.path.join(directory, f))]
+        vid_path = os.path.join(directory, "interpolated.mp4")
+        if os.path.exists(vid_path):
+            continue
+
         for idx, (img1, img2) in enumerate(zip(artworks, artworks[1:])):
 
             # Number of frames N is: N=(2^times_to_interpolate+1)
@@ -96,6 +99,7 @@ def image_interpolation(args):
 
             save_path = os.path.join(directory, "%02d-%02d"%(idx, idx+1))
             os.makedirs(save_path, exist_ok=True)
+
             shutil.copyfile(img1, os.path.join(save_path, "0.png"))
             shutil.copyfile(img2, os.path.join(save_path, "3.png"))
 
@@ -138,6 +142,11 @@ def image_interpolation(args):
 
                 new_path = os.path.join(save_path, "%02d-%02d"%(j, j+1))
                 os.makedirs(new_path, exist_ok=True)
+
+                if os.path.exists(os.path.join(new_path, 'interpolated.mp4')):
+                    print(f"{os.path.join(new_path, 'interpolated.mp4')} exists, moving on..")
+                    continue
+
                 shutil.copyfile(i1, os.path.join(new_path, "0.png"))
                 shutil.copyfile(i2, os.path.join(new_path, "1.png"))
 
@@ -150,7 +159,6 @@ def image_interpolation(args):
 
         videos = find_mp4_files(directory)
         print(videos)
-        vid_path = os.path.join(directory, "interpolated.mp4")
 
         (
         ffmpeg

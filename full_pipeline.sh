@@ -25,14 +25,14 @@ echo ""
 
 python utils.py --input_path $INPATH --folder_name $FOLDER_NAME --s $S --i $I --f $F
 
-# Generate dissusion images
+# Generate diffusion images
 conda activate diff
-python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --output_path $OUTPATH --model $M --interpolation_steps $S 
+python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --output_path $OUTPATH --model $M --interpolation_steps $S --outpaint 
 conda deactivate
 
 # interpolate between images and generate video
 conda activate film
-# python generate_videos.py --input_path output --folder_name $FOLDER_NAME --sec_interpolation $I --sec_freeze $F #--clean
+# python generate_videos.py --input_path $OUTPATH --folder_name $FOLDER_NAME --sec_interpolation $I --sec_freeze $F #--clean
 python generate_videos_alpha.py --input_path $OUTPATH --folder_name $FOLDER_NAME --sec_interpolation $I --sec_freeze $F --clean
 conda deactivate
 
