@@ -8,6 +8,11 @@ We explore the creation of a dynamic bridge between between two paintings, seaml
 
 https://github.com/icedoom888/ArtWalks/assets/9220778/42130399-c889-4d95-a930-4b51bc3c878a
 
+https://github.com/icedoom888/ArtWalks/assets/9220778/d00a7dec-9057-47b7-8221-d1d6cf647758
+
+
+
+
 ## Architecture
 
 Our proposed method consists of a three-stage generative process.
