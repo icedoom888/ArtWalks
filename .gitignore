@@ -136,7 +136,6 @@ test_outputs
 examples/music
 *.jpg
 *.mp4
-*.png
 output/
 inputdata/
 stories/
