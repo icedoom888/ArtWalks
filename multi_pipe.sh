@@ -17,8 +17,16 @@
 ## BURKI ##
 # bash full_pipeline.sh stories Burki_1_Portrait_Women_cropped /media/data-storage/iaivc 5 13 10 kandinsky
 # bash full_pipeline.sh stories Burki_2_Self_Portrait_cropped /media/data-storage/iaivc 5 9 10 kandinsky
-bash full_pipeline.sh stories Burki_3_Addiction_and_Paranoia_cropped /media/data-storage/iaivc 5 8 10 kandinsky
-bash full_pipeline.sh stories Burki_4_Horses /media/data-storage/iaivc 5 9 10 kandinsky
+# bash full_pipeline.sh stories Burki_3_Addiction_and_Paranoia_cropped /media/data-storage/iaivc 5 8 10 kandinsky
+# bash full_pipeline.sh stories Burki_4_Horses_cropped /media/data-storage/iaivc 5 9 10 kandinsky
 # bash full_pipeline.sh stories Burki_5_Oil_Portraits_cropped /media/data-storage/iaivc 5 7 10 kandinsky
 # bash full_pipeline.sh stories Burki_6_Flowers_cropped /media/data-storage/iaivc 5 7 10 kandinsky
-bash full_pipeline.sh stories Burki_7_Spooky_cropped /media/data-storage/iaivc 5 9 10 kandinsky
+# bash full_pipeline.sh stories Burki_7_Spooky_cropped /media/data-storage/iaivc 5 9 10 kandinsky
+
+
+## OUTPAINT
+# bash full_pipeline.sh stories Burki_4_Horses /media/data-storage/iaivc 5 9 10 kandinsky
+
+bash full_pipeline.sh stories Burki_3_Addiction_and_Paranoia /media/data-storage/iaivc 5 8 10 kandinsky
+bash full_pipeline.sh stories Story_E /media/data-storage/iaivc 5 10 10 kandinsky
+bash full_pipeline.sh stories Burki_5_Oil_Portraits /media/data-storage/iaivc 5 7 10 kandinsky

@@ -14,7 +14,7 @@ import sys
 sys.path.append("/projects/iaivc/special_project/diffusion_models")
 from weight_samplers import get_weight_sampler
 from PIL import Image, ImageOps
-from diffusers import AutoPipelineForInpainting, KandinskyV22InpaintPipeline
+from diffusers import KandinskyV22InpaintPipeline, AutoPipelineForInpainting
 from diffusers.models import UNet2DConditionModel
 
 import matplotlib.pyplot as plt
@@ -46,43 +46,65 @@ def make_masks(image, target_img_size):
 
     return [init_img_1, init_img_2], [mask_1, mask_2]
 
-def outpaint(model, image, target_img_size):
-
+def outpaint_image(model, image, target_img_size, background=True):
+    # resize image
     image.thumbnail(target_img_size)
 
+    # define models
     unet = UNet2DConditionModel.from_pretrained('kandinsky-community/kandinsky-2-2-decoder-inpaint', subfolder='unet').to(torch.float16).to('cuda')
     decoder = KandinskyV22InpaintPipeline.from_pretrained('kandinsky-community/kandinsky-2-2-decoder-inpaint', unet=unet, torch_dtype=torch.float16).to('cuda')
+    # refiner = AutoPipelineForInpainting.from_pretrained("stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, variant="fp16").to("cuda")
+    
+    # make seed
+    generator = torch.Generator("cuda").manual_seed(92)
 
     # embedd image
-    image_emb = model.prior.interpolate(images_and_prompts=['a neutral background', image], 
-                                      weights=[0.32, 0.68],
-                                      num_inference_steps=25, 
-                                      num_images_per_prompt=1,
-                                      guidance_scale=4, 
-                                      negative_prompt='')
-    negative_emb = model.prior(prompt='', num_inference_steps=25, num_images_per_prompt=1, guidance_scale=4)
+    if background:
+        image_emb = model.prior.interpolate(images_and_prompts=['background', image], 
+                                        weights=[0.5, 0.5],
+                                        num_inference_steps=25, 
+                                        num_images_per_prompt=1,
+                                        guidance_scale=4, 
+                                        negative_prompt='',
+                                        generator=generator)
+    
+    else:
+        image_emb = model.prior.interpolate(images_and_prompts=['background', image], 
+                                        weights=[0.5, 0.5],
+                                        num_inference_steps=25, 
+                                        num_images_per_prompt=1,
+                                        guidance_scale=4, 
+                                        negative_prompt='',
+                                        generator=generator)
+        
+    negative_emb = model.prior(prompt='', num_inference_steps=25, num_images_per_prompt=1, guidance_scale=4, generator=generator)
 
     # load base and mask image
     init_images, mask_images = make_masks(image, target_img_size)
     
+    # Generate image 1
     gen_1 = decoder(image_embeds=image_emb.image_embeds,
                     negative_image_embeds=negative_emb.negative_image_embeds,
                     num_inference_steps=50, 
-                    height=512,
-                    width=512, 
+                    height=1024,
+                    width=1024, 
                     guidance_scale=4,
                     image=init_images[0], 
-                    mask_image=mask_images[0]).images[0].resize(mask_images[0].size)
-    
+                    mask_image=mask_images[0],
+                    generator=generator).images[0].resize(mask_images[0].size)
+
+    # Generate image 2
     gen_2 = decoder(image_embeds=image_emb.image_embeds, 
                     negative_image_embeds=negative_emb.negative_image_embeds,
                     num_inference_steps=50, 
-                    height=512,
-                    width=512, 
+                    height=1024,
+                    width=1024, 
                     guidance_scale=4,
                     image=init_images[1], 
-                    mask_image=mask_images[1]).images[0].resize(mask_images[1].size)
+                    mask_image=mask_images[1],
+                    generator=generator).images[0].resize(mask_images[1].size)
 
+    # stack images
     gen_images = [gen_1, gen_2]
 
     # outpainted image
@@ -152,10 +174,10 @@ def save_originals(model, images, save_path, idx, same_ratio=False, square_crop=
     
     if not same_ratio:
         if outpaint:
-            pil_img1 = outpaint(model, img1, target_img_size)
+            pil_img1 = outpaint_image(model, img1, target_img_size)
             pil_img1.save(os.path.join(save_path, "%02d-%02d.png"%(idx, idx)))
 
-            pil_img2 = outpaint(model, img2, target_img_size)
+            pil_img2 = outpaint_image(model, img2, target_img_size)
             pil_img2.save(os.path.join(save_path, "%02d-%02d.png"%(idx+1, idx+1)))
         
         else:
@@ -320,8 +342,8 @@ def image_generation(args):
                                                          og_img1, 
                                                          og_img2, 
                                                          args.interpolation_steps + args.accumulated, 
-                                                         args.height, 
-                                                         args.width, 
+                                                         720, #args.height, 
+                                                         720, #args.width, 
                                                          args.weight_sampler,
                                                          args.decoder_guidance_scale,
                                                          args.use_neg_prompts)
@@ -330,11 +352,16 @@ def image_generation(args):
                                                          og_img1, 
                                                          og_img2, 
                                                          args.interpolation_steps, 
-                                                         args.height, 
-                                                         args.width, 
+                                                         720, #  args.height, 
+                                                         720, #  args.width, 
                                                          args.weight_sampler,
                                                          args.decoder_guidance_scale,
                                                          args.use_neg_prompts)
+            
+        out_imgs = []
+        for gen_img in generated_frames:
+            out_imgs.append(outpaint_image(model, gen_img, target_img_size=(args.width, args.height), background=False))
+        generated_frames = out_imgs
         
         # Save generated images
         interpolation_save_path = os.path.join(save_path, "%02d-%02d"%(idx, idx+1))

@@ -145,8 +145,20 @@ random_*/
 social/
 short_content/
 scripts/
+multi_pipe.sh
+utils.py
 
 # frame-interpolation
 frame-interpolation/eval/__pycache__/
 frame-interpolation/pretrained_models-20230921T132722Z-001.zip
 frame-interpolation/pretrained_models/
+
+# social exp
+generate_music_videos.py
+instagram_poster.py
+music_funcs.py
+session.json
+story_generation.py
+video_factory.sh
+video_geneation_gui.py
+video_poster.sh
