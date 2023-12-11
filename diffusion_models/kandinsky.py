@@ -61,7 +61,7 @@ def outpaint_image(model, image, target_img_size, background=True):
     # embedd image
     if background:
         image_emb = model.prior.interpolate(images_and_prompts=['background', image], 
-                                        weights=[0.5, 0.5],
+                                        weights=[0.33, 0.67],
                                         num_inference_steps=25, 
                                         num_images_per_prompt=1,
                                         guidance_scale=4, 
@@ -70,7 +70,7 @@ def outpaint_image(model, image, target_img_size, background=True):
     
     else:
         image_emb = model.prior.interpolate(images_and_prompts=['background', image], 
-                                        weights=[0.5, 0.5],
+                                        weights=[0.33, 0.67],
                                         num_inference_steps=25, 
                                         num_images_per_prompt=1,
                                         guidance_scale=4, 
@@ -357,11 +357,12 @@ def image_generation(args):
                                                          args.weight_sampler,
                                                          args.decoder_guidance_scale,
                                                          args.use_neg_prompts)
-            
-        out_imgs = []
-        for gen_img in generated_frames:
-            out_imgs.append(outpaint_image(model, gen_img, target_img_size=(args.width, args.height), background=False))
-        generated_frames = out_imgs
+        
+        if args.outpaint:
+            out_imgs = []
+            for gen_img in generated_frames:
+                out_imgs.append(outpaint_image(model, gen_img, target_img_size=(args.width, args.height), background=False))
+            generated_frames = out_imgs
         
         # Save generated images
         interpolation_save_path = os.path.join(save_path, "%02d-%02d"%(idx, idx+1))

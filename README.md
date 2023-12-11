@@ -1,14 +1,26 @@
-# Diffusion-Videos
+# ArtWalks via Latent Diffusion Models
 
-[[_TOC_]]
+![](assets/teaser_final.png)
+
+We explore the creation of a dynamic bridge between between two paintings, seamlessly transitioning between artworks adding motion to static images. We build a two-stage generative process, creating both abstract-conceptual interpolation as well as spatio-temporal interpolation. We first hallucinate intermediate artworks using a generative diffusion model, then interpolate between resulting frames using a motion generation network, thus obtaining a complete video out of static paintings.
+
+## What to expect
+
+
 
 ## Architecture
 
-Generate intermidiate frames with a generative diffusion model:
-![](assets/sd_interpolation.jpg)
+Our proposed method consists of a three-stage generative process.
 
-Interpolate between all frames (original and generated) with FILM:
-![](assets/frame_interpolation.jpg)
+1. **Conceptual interpolation stage**: we employ a diffusion-based image generative model [Razzhigaev et al. 2023](https://github.com/ai-forever/Kandinsky-2) to efficiently produce 𝑚 intermediate images 𝐾1 to 𝐾𝑚 situated between two reference paintings, A and B.
+
+2. **Spatio-temporal interpolation stage**: we employ a large motion interpolation network [Reda et al. 2022](https://github.com/google-research/frame-interpolation) to generate motion sequences between A, the generated images 𝐾 and B.
+    
+3. **Upscaling stage**: we finally upscale our results by employing a video super-resolution model [Wang et al.](https://github.com/saba99/Video-Super-Resolution-ESRGAN) reaching a resolution of 2K. 
+
+You can see the full pipeline in the following illustration.
+
+![](assets/pipeline_final.png)
 
 
 
@@ -20,57 +32,8 @@ Install ffmpeg and av dev libs
 sudo apt install ffmpeg libavformat-dev libavdevice-dev
 ```
 
-1. Clone repo:
-```bash
-git clone git@gitlab.ethz.ch:mtc/special_project.git
-cd frame-interpolation
-git submodule init
-git submodule update
-cd ..
-```
 
-2. Create diffusers environemnt
-```bash
-conda create -n diffusers python=3.10 -y
-conda activate diffusers
-pip install -r requirements.txt
-conda deactivate
-```
-
-3. Create FILM environemnt
-```bash
-conda create -n film python=3.9 -y
-conda activate film
-cd frame-interpolation
-pip install -r requirements.txt
-pip install tensorflow
-conda deactivate
-```
-
-4. Create SR environment
-```bash
-conda create -n sr python=3.9
-conda activate sr
-pip install basicsr
-# facexlib and gfpgan are for face enhancement
-pip install facexlib
-pip install gfpgan
-pip install -r requirements.txt
-conda deactivate
-```
-
-5. (Optional) Create Music environment
-```bash
-conda create -n music python=3.8
-conda activate srmusic
-pip install torch torchvideo torchaudio
-pip install -U git+https://github.com/facebookresearch/demucs#egg=demucs
-pip install tqdm
-pip install matplotlib opencv-python librosa Ipython
-conda deactivate
-```
-
-6. Complete environment (no tf)
+1. Diffusion environment
 ```bash
 conda create -p /projects/Anaconda/envs/diff python=3.8 -y
 conda activate diff
@@ -83,9 +46,33 @@ pip install git+https://github.com/openai/CLIP.git
 conda deactivate
 ```
 
-## Full Pipeline
+2. Create Image Interpolation environemnt
+```bash
+conda create -n film python=3.9 -y
+conda activate film
+cd frame-interpolation
+pip install -r requirements.txt
+pip install tensorflow
+conda deactivate
+```
 
-You can run the full pipeline using the following command:
+3. (Optional) Create Music environment
+```bash
+conda create -n music python=3.8
+conda activate srmusic
+pip install torch torchvideo torchaudio
+pip install -U git+https://github.com/facebookresearch/demucs#egg=demucs
+pip install tqdm
+pip install matplotlib opencv-python librosa Ipython
+conda deactivate
+```
+
+
+## How to Use
+
+In order to use ArtWalks you just need to make a folder with all your favourite images.
+By launching the following script you will be able to generate a 2K video with your own pictures:
+
 ```bash
 bash full_pipeline.sh $INPATH $FOLDER_NAME $S $I $F $MODEL
 ```
@@ -93,14 +80,14 @@ Where:
  - *INPATH* : Path to the input data folder
  - *FOLDER_NAME* : Name of the folder containing the images
  - *S* : Number of images to generate with diffusion between each pair of images
- - *I* : Number of interpolation images to generate between each pair of generated images
+ - *I* : Number of seconds that have to pass between each consecutive pair of generated images
  - *F* : Number of seconds to freeze on each original image during the video 
  - *MODEL* : Name of the diffusion model to use (unclip/kandinsky)
 
-## Single components
 ### Story Generator
 
-Generate a random story by using a collection of immages:
+When you have a big collection of images, you can use this tool to select a random subset of *img_num* images. 
+Generate a random story from a collection of immages:
 
 ```bash
 python random_story_generation.py --input_path inputdata --img_num 10
@@ -108,12 +95,14 @@ python random_story_generation.py --input_path inputdata --img_num 10
 Where:
  - *input_path* : Path to the folder containing all subfolders of images
  - *img_num* : Number of images to randomly sample
+ 
 ### Diffusion 
 
+You can also just generate any sequence of images between two given pictures.
 Run diffusion pipeline to interpolate between every pair of images in `input_path` (It takes roughly ~10s per pair):
 
 ```bash
-python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --model $M --interpolation_steps $S 
+python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --output_path $OUTPATH --model $M --interpolation_steps $S --outpaint 
 ```
 
 This script makes use of either the [UnCLIP Image Interpolation pipeline](https://github.com/huggingface/diffusers/tree/main/examples/community#unclip-image-interpolation-pipeline) or the [Kandisnky 2 model](https://github.com/ai-forever/Kandinsky-2).
@@ -126,19 +115,27 @@ parser.add_argument("--folder_name", help="Name of the folder to read",
 parser.add_argument("--output_path", help="Path to the output folder",
                     type=str, default="output")
 parser.add_argument("--model", help="Choose between kandinsky/unclip model", type=str, default='unclip')
-parser.add_argument("--glob_pattern", help="Pattern to find files",
-                    type=str, default="**/*.") 
 parser.add_argument("--interpolation_steps", help="Number of generated frames between a pair of images",
                     type=int, default=5)
 parser.add_argument("--square_crop", help="If active, crops the images in a square.", action="store_true")
 parser.add_argument("--no_originals", help="If active, don't save original images.", action="store_true")
+parser.add_argument("--no_originals", help="If active, don't save original images.", action="store_true")
+parser.add_argument("--outpaint", help="If active, outpaints the image using generative model.", action="store_true")
+parser.add_argument("--h", help="Height of the generated images",type=int, default=720)
+parser.add_argument("--w", help="Width of the generated images",type=int, default=1280)
+
 ```
 
 ### Frame interpolation
+
 Generate videos interpolating between diffusion frames with (It takes roughly ~2 mins per pair):
-```bash
-python generate_videos.py --input_path output --folder_name $FOLDER_NAME --sec_interpolation $I --sec_freeze $F --clean
+``` bash
+ python generate_videos_alpha.py --input_path output --folder_name $FOLDER_NAME --sec_interpolation $I --sec_freeze $F --clean
 ```
+
+```generate_videos_alpha.py``` will produce videos with a non-linear acceleration between frames. 
+
+```generate_videos.py``` will produce videos with a linear interpolation speed between frames.
 
 Script arguments:
 ```python

@@ -12,6 +12,8 @@ S=$4
 I=$5
 F=$6
 M=$7
+h=$8
+w=$9
 
 echo ""
 echo "INPUT FOLDER PATH: $INPATH"
@@ -21,13 +23,15 @@ echo "NUMBER OF DIFFUSION IMAGES: $S"
 echo "SECONDS BETWEEN IMAGES: $I"
 echo "SECONDS OF FREEZING ORIGINAL FRAMES: $F"
 echo "MODEL CHOSEN: $M"
+echo "IMAGE HEIGHT: $h"
+echo "iMAGE WIDTH: $w"
 echo ""
 
 python utils.py --input_path $INPATH --folder_name $FOLDER_NAME --s $S --i $I --f $F
 
 # Generate diffusion images
 conda activate diff
-python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --output_path $OUTPATH --model $M --interpolation_steps $S --outpaint 
+python diffusion_models/diffusion.py --input_path $INPATH --folder_name $FOLDER_NAME --output_path $OUTPATH --model $M --interpolation_steps $S --outpaint --h $h --w $w
 conda deactivate
 
 # interpolate between images and generate video
