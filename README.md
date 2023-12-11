@@ -6,7 +6,7 @@ We explore the creation of a dynamic bridge between between two paintings, seaml
 
 ## What to expect
 
-
+https://github.com/icedoom888/ArtWalks/assets/9220778/42130399-c889-4d95-a930-4b51bc3c878a
 
 ## Architecture
 
