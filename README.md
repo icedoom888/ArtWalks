@@ -11,6 +11,15 @@ https://github.com/icedoom888/ArtWalks/assets/9220778/42130399-c889-4d95-a930-4b
 https://github.com/icedoom888/ArtWalks/assets/9220778/d00a7dec-9057-47b7-8221-d1d6cf647758
 
 
+#
+## Table of Contents
+1. [Architecture](#architecture)
+2. [Preparations](#preparations)
+3. [How to Use](#how-to-use)
+    1. [Story Generator](#story-generator)
+    2. [Diffusion Image Generation](#diffusion-image-generation)
+    3. [Frame interpolation](#frame-interpolation)
+    4. [Video Super Resolution](#video-super-resolution)
 
 
 ## Architecture
@@ -101,7 +110,7 @@ Where:
  - *input_path* : Path to the folder containing all subfolders of images
  - *img_num* : Number of images to randomly sample
  
-### Diffusion 
+### Diffusion Image Generation 
 
 You can also just generate any sequence of images between two given pictures.
 Run diffusion pipeline to interpolate between every pair of images in `input_path` (It takes roughly ~10s per pair):
